@@ -15,6 +15,11 @@ from pyomo.opt import SolverFactory
 # C2: 0 <= C_b <= 20% T
 # C3: \sum_{inv} C_{inv} = T
 
+# x= 70000.0
+# y= 20000.0
+# y= 10000.0
+# objfun= 6700.0
+
 #%% Constants
 T = 1e5
 
