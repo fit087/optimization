@@ -11,9 +11,13 @@ from pyomo.opt import SolverFactory
 
 #%% Formulation
 # Obj: Max: x+y
+# Constraints:
 # C1: -x + 2y <= 8
 # C2: 2x + y <= 14
 # C3: 2x - y <= 10
+# Bonds:
+# B1: 0<= x <=10
+# B2: 0<= y <=10
 
 #%%
 model = pyo.ConcreteModel()
