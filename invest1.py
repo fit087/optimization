@@ -21,21 +21,20 @@ T = 1e5
 #%% Create a model and declare components
 model = pyo.ConcreteModel()
 
-
 #%% Instantiate the Model
-model.x = pyo.Var(bounds=(0,10))
-model.y = pyo.Var(bounds=(0,10))
+model.ca = pyo.Var(bounds=(0, T))
+model.cb = pyo.Var(bounds=(0, 0.2*T))
+model.cc = pyo.Var(bounds=(0, 0.1*T))
 
+ca = model.ca
+cb = model.cb
+cc = model.cc
 
-x = model.x
-y = model.y
+model.C1 = pyo.Constraint(expr= ca+cb+cc==T)
 
-model.C1 = pyo.Constraint(expr= -x+2*y<=8)
-model.C2 = pyo.Constraint(expr=(2*x+y<=14))
-model.C3 = pyo.Constraint(expr=(2*x-y<=10))
+model.obj = pyo.Objective(expr=0.05*ca+0.1*cb+0.12*cc, sense=pyo.maximize)
 
-model.obj = pyo.Objective(expr=x+y, sense=pyo.maximize)
-
+#%% Apply Solver
 print('scip = ', SolverFactory('scip').available() == True)
 print('glpk = ', SolverFactory('glpk').available() == True)
 
@@ -50,15 +49,15 @@ opt = SolverFactory('glpk')
 # opt = pyo.SolverFactory('scip')
 opt.solve(model)
 
+#%% Interrogate Solver Results
 model.pprint()
 
-x_sol = pyo.value(x)
-y_sol = pyo.value(y)
+x_sol = pyo.value(ca)
+y_sol = pyo.value(cb)
+z_sol = pyo.value(cc)
 
 print('x=', x_sol)
 print('y=', y_sol)
+print('y=', z_sol)
 
-#%% Apply Solver
-
-
-#%% Interrogate Solver Results
+print('objfun=', pyo.value(model.obj))
