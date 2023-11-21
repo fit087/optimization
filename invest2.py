@@ -16,10 +16,20 @@ from pyomo.opt import SolverFactory
 # C3: 0 <= C_d <= 30% T
 # C4: \sum_{inv} C_{inv} = T
 
-# x= 70000.0
-# y= 20000.0
-# y= 10000.0
+# model.obj = pyo.Objective(expr=0.05*C['A']+0.1*C['B']+0.12*C['C']+1e-6*C['D']**2, sense=pyo.maximize)
+# C[A]= 70000.0
+# C[B]= 20000.0
+# C[C]= 10000.0
+# C[D]= 0.0
 # objfun= 6700.0
+
+# model.obj = pyo.Objective(expr=pyo.summation(R), sense=pyo.maximize)
+
+# C[A]= 40000.0
+# C[B]= 20000.0
+# C[C]= 10000.0
+# C[D]= 30000.0
+# objfun= 104100.000000001
 
 #%% Constants
 # T = 1e5
@@ -34,16 +44,26 @@ model.setInv = pyo.Set(initialize=['A', 'B', 'C', 'D'])
 model.T = 1e5
 
 model.C = pyo.Var(model.setInv, bounds=(0, model.T))
+
+model.R = pyo.Var(model.setInv, bounds=(0, model.T))
+
 C=model.C
+R=model.R
 model.C1 = pyo.Constraint(expr= C['C']<=0.1*model.T)
 model.C2 = pyo.Constraint(expr=(C['B']<=0.2*model.T))
 model.C3 = pyo.Constraint(expr=(C['D']<=0.3*model.T))
+
+model.C4 = pyo.Constraint(expr= R['A']==0.05*C['A'])
+model.C5 = pyo.Constraint(expr= R['B']==0.1*C['B'])
+model.C6 = pyo.Constraint(expr= R['C']==0.12*C['C'])
+model.C7 = pyo.Constraint(expr= R['D']==1e-6*C['D']**2)
 
 # C=model.C
 
 model.C4 = pyo.Constraint(expr= pyo.summation(C)==model.T)
 
-model.obj = pyo.Objective(expr=0.05*C['A']+0.1*C['B']+0.12*C['C']+1e-6*C['D']**2, sense=pyo.maximize)
+model.obj = pyo.Objective(expr=pyo.summation(R), sense=pyo.maximize)
+# model.obj = pyo.Objective(expr=0.05*C['A']+0.1*C['B']+0.12*C['C']+1e-6*C['D']**2, sense=pyo.maximize)
 
 #%% Apply Solver
 # print('scip = ', SolverFactory('scip').available() == True)
@@ -58,6 +78,7 @@ model.obj = pyo.Objective(expr=0.05*C['A']+0.1*C['B']+0.12*C['C']+1e-6*C['D']**2
     
 # opt = SolverFactory('glpk')
 opt = pyo.SolverFactory('scip')
+# opt = pyo.SolverFactory('cbc')
 opt.solve(model)
 
 #%% Interrogate Solver Results
